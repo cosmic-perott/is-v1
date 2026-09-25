@@ -6,36 +6,35 @@ from pynput import keyboard
 from pynput.keyboard import Controller, Key
 import pyautogui
 
-file_path = ""
-raw_path = ""
+file_path = "/Users/kimjunyoung/Desktop/COSMOS/SCOTT FREE/colors.txt"
+raw_path = "/Users/kimjunyoung/Desktop/COSMOS/SCOTT FREE/raw.txt"
 kb = Controller()
 pyautogui.FAILSAFE = True
 
 def run_native_automation(screenshot_path):
-    print("Controlling your active Chrome browser...")
+    print("🤖 Controlling your active Chrome browser...")
     
+    # 1. Copy the screenshot image to the macOS clipboard as a TIFF picture
     abs_path = os.path.abspath(screenshot_path)
     applescript_copy = f'''
     set the clipboard to (read (POSIX file "{abs_path}") as TIFF picture)
     '''
     subprocess.run(["osascript", "-e", applescript_copy])
     
+    # 2. Bring Google Chrome to the front and open your specific Gemini URL directly
     applescript_navigate = '''
     tell application "Google Chrome"
         activate
         if (count of windows) = 0 then
             make new window
         end if
-        set currentTabURL to URL of active tab of front window
-        if currentTabURL does not contain "gemini.google.com" then
-            set URL of active tab of front window to "https://gemini.google.com"
-            delay 2.5 -- wait for page to load
-        end if
+        set URL of active tab of front window to "https://gemini.google.com/app/583345bccab410b9?hl=ko"
     end tell
     '''
     subprocess.run(["osascript", "-e", applescript_navigate])
-    time.sleep(1.5)
+    time.sleep(3.0) # Give the page a solid moment to fully load your specific chat session
     
+    # 3. Focus Gemini's text box via JavaScript
     applescript_focus_box = '''
     tell application "Google Chrome"
         execute active tab javascript "
@@ -49,6 +48,7 @@ def run_native_automation(screenshot_path):
     subprocess.run(["osascript", "-e", applescript_focus_box])
     time.sleep(0.5)
     
+    # 4. Paste the screenshot image into the chat box
     print("Pasting screenshot into Gemini...")
     with kb.pressed(Key.cmd):
         kb.press('v')
@@ -56,15 +56,17 @@ def run_native_automation(screenshot_path):
     
     time.sleep(2) # Give image preview time to attach
     
+    # 5. Type prompt and hit enter
     print("Typing prompt...")
-    prompt_text = ""
+    prompt_text = "SOLVE THE QUESTION. solve this multiple choice question. at the end of your answer just simply reply using A, B, C, or D\n"
     for char in prompt_text:
         kb.type(char)
         time.sleep(0.01)
         
-    print("Waiting for Gemini's response (7 seconds)...")
-    time.sleep(7) # Fixed wait time
+    print("Waiting for Gemini's response (15 seconds)...")
+    time.sleep(15) # Wait time
     
+    # 6. Use PyAutoGUI to click the center of the window and do Cmd + A / Cmd + C
     print("Clicking center of window and copying raw page text via PyAutoGUI...")
     screen_width, screen_height = pyautogui.size()
     pyautogui.click(screen_width / 2, screen_height / 2)
@@ -75,6 +77,7 @@ def run_native_automation(screenshot_path):
     pyautogui.hotkey('command', 'c')
     time.sleep(0.8)
     
+    # 7. Read clipboard, write raw.txt (minus last line), and find the *most recent* A/B/C/D line for colors.txt
     clipboard_result = subprocess.run(["pbpaste"], capture_output=True, text=True)
     raw_text = clipboard_result.stdout.strip()
     
@@ -87,9 +90,9 @@ def run_native_automation(screenshot_path):
                 f.write("\n".join(raw_lines_to_write))
             print(f"✅ Raw webpage text written to raw.txt (last line omitted)!")
             
-            # Search for a line that is strictly a single letter (A, B, C, or D)
+            # Search from the bottom up for the most recent single-letter line (A, B, C, or D)
             answer_found = None
-            for line in lines:
+            for line in reversed(lines):
                 cleaned = line.strip().replace(".", "")
                 if cleaned.upper() in ["A", "B", "C", "D"] and len(cleaned) == 1:
                     answer_found = cleaned.upper()
@@ -98,11 +101,11 @@ def run_native_automation(screenshot_path):
             if answer_found:
                 with open(file_path, "w") as f:
                     f.write(answer_found + "\n")
-                print(f"Found exact answer option '{answer_found}' and wrote to colors.txt!\n")
+                print(f"✅ Found most recent answer option '{answer_found}' and wrote to colors.txt!\n")
             else:
-                print("Could not find an isolated A, B, C, or D letter in the text.")
+                print("⚠️ Could not find an isolated A, B, C, or D letter in the text.")
     else:
-        print("Could not read clipboard content.")
+        print("⚠️ Could not read clipboard content.")
 
 def take_screenshot():
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
