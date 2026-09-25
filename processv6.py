@@ -6,8 +6,8 @@ from pynput import keyboard
 from pynput.keyboard import Controller, Key
 import pyautogui
 
-file_path = "/Users/kimjunyoung/Desktop/COSMOS/SCOTT FREE/colors.txt"
-raw_path = "/Users/kimjunyoung/Desktop/COSMOS/SCOTT FREE/raw.txt"
+file_path = ""
+raw_path = ""
 kb = Controller()
 pyautogui.FAILSAFE = True
 
@@ -28,7 +28,7 @@ def run_native_automation(screenshot_path):
         if (count of windows) = 0 then
             make new window
         end if
-        set URL of active tab of front window to "https://gemini.google.com/app/583345bccab410b9?hl=ko"
+        set URL of active tab of front window to ""
     end tell
     '''
     subprocess.run(["osascript", "-e", applescript_navigate])
