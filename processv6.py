@@ -12,7 +12,7 @@ kb = Controller()
 pyautogui.FAILSAFE = True
 
 def run_native_automation(screenshot_path):
-    print("🤖 Controlling your active Chrome browser...")
+    print("Controlling your active Chrome browser...")
     
     # 1. Copy the screenshot image to the macOS clipboard as a TIFF picture
     abs_path = os.path.abspath(screenshot_path)
@@ -88,7 +88,7 @@ def run_native_automation(screenshot_path):
             raw_lines_to_write = lines[:-1]
             with open(raw_path, "w") as f:
                 f.write("\n".join(raw_lines_to_write))
-            print(f"✅ Raw webpage text written to raw.txt (last line omitted)!")
+            print(f"Raw webpage text written to raw.txt (last line omitted)!")
             
             # Search from the bottom up for the most recent single-letter line (A, B, C, or D)
             answer_found = None
@@ -101,11 +101,11 @@ def run_native_automation(screenshot_path):
             if answer_found:
                 with open(file_path, "w") as f:
                     f.write(answer_found + "\n")
-                print(f"✅ Found most recent answer option '{answer_found}' and wrote to colors.txt!\n")
+                print(f"Found most recent answer option '{answer_found}' and wrote to colors.txt!\n")
             else:
-                print("⚠️ Could not find an isolated A, B, C, or D letter in the text.")
+                print("Could not find an isolated A, B, C, or D letter in the text.")
     else:
-        print("⚠️ Could not read clipboard content.")
+        print("Could not read clipboard content.")
 
 def take_screenshot():
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
